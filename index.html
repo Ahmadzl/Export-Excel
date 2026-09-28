@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Part List</title>
+    <title>Article List</title>
 
     <!-- SheetJS - Excel export -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -37,7 +37,7 @@
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
         }
 
         .form-row {
@@ -102,10 +102,6 @@
             background: #6c757d;
             color: white;
             display: none;
-        }
-
-        .search {
-            margin-bottom: 15px;
         }
 
         .table-container {
@@ -200,7 +196,7 @@
 
 <div class="container">
 
-    <h1>Part List</h1>
+    <h1>Article List</h1>
 
     <!-- Add / Edit -->
     <div class="card">
@@ -208,103 +204,154 @@
         <div class="form-row">
 
             <div class="field">
-                <label for="partNumber">Part Number</label>
+
+                <label for="articleNumber">
+                    Article Number
+                </label>
+
                 <input
                     type="text"
-                    id="partNumber"
-                    placeholder="Enter part number"
+                    id="articleNumber"
+                    placeholder="Enter article number"
+                    inputmode="numeric"
                     autocomplete="off">
+
             </div>
 
+
             <div class="field">
-                <label for="partName">Part Name</label>
+
+                <label for="articleName">
+                    Article Name
+                </label>
+
                 <input
                     type="text"
-                    id="partName"
-                    placeholder="Enter part name"
+                    id="articleName"
+                    placeholder="Enter article name"
                     autocomplete="off">
+
             </div>
+
 
             <button
                 id="addButton"
                 class="add-btn"
-                onclick="addOrUpdatePart()">
-                Add Part
+                onclick="addOrUpdateArticle()">
+
+                Add Article
+
             </button>
+
 
             <button
                 id="cancelButton"
                 class="cancel-btn"
                 onclick="cancelEdit()">
+
                 Cancel
+
             </button>
 
         </div>
 
     </div>
 
+
     <!-- Search -->
     <div class="card">
 
         <div class="field">
-            <label for="searchInput">Search</label>
+
+            <label for="searchInput">
+                Search
+            </label>
 
             <input
                 type="text"
                 id="searchInput"
-                placeholder="Search by part number or name..."
+                placeholder="Search by article number or name..."
                 autocomplete="off"
                 oninput="renderTable()">
+
         </div>
 
     </div>
 
-    <!-- List -->
+
+    <!-- Article List -->
     <div class="card">
 
         <div class="counter">
-            Total Parts: <span id="counter">0</span>
+
+            Total Articles:
+            <span id="counter">0</span>
+
         </div>
+
 
         <div class="table-container">
 
             <table>
 
                 <thead>
+
                     <tr>
+
                         <th>#</th>
-                        <th>Part Number</th>
-                        <th>Part Name</th>
-                        <th>Actions</th>
+
+                        <th>
+                            Article Number
+                        </th>
+
+                        <th>
+                            Article Name
+                        </th>
+
+                        <th>
+                            Actions
+                        </th>
+
                     </tr>
+
                 </thead>
 
-                <tbody id="partsTableBody">
+
+                <tbody id="articlesTableBody">
                 </tbody>
 
             </table>
+
 
             <div
                 id="emptyMessage"
                 class="empty"
                 style="display:none;">
-                No parts found.
+
+                No articles found.
+
             </div>
 
         </div>
+
 
         <div class="bottom-buttons">
 
             <button
                 class="export-btn"
                 onclick="exportToExcel()">
+
                 Export to Excel
+
             </button>
+
 
             <button
                 class="clear-btn"
-                onclick="clearAllParts()">
+                onclick="clearAllArticles()">
+
                 Clear All
+
             </button>
 
         </div>
@@ -316,142 +363,226 @@
 
 <script>
 
-    // Store all parts
-    let parts = [];
+    // Store all articles
+    let articles = [];
 
-    // Index of the part currently being edited
+    // Index of the article currently being edited
     let editingIndex = -1;
 
 
     // Load saved data when page starts
     window.onload = function () {
 
-        const savedParts = localStorage.getItem("partsList");
+        const savedArticles =
+            localStorage.getItem("articlesList");
 
-        if (savedParts) {
+
+        if (savedArticles) {
+
             try {
-                parts = JSON.parse(savedParts);
+
+                articles =
+                    JSON.parse(savedArticles);
+
             } catch {
-                parts = [];
+
+                articles = [];
+
             }
+
         }
+
 
         renderTable();
 
-        document.getElementById("partNumber").focus();
+
+        document
+            .getElementById("articleNumber")
+            .focus();
+
     };
 
 
     // Save data to browser
-    function saveParts() {
+    function saveArticles() {
 
         localStorage.setItem(
-            "partsList",
-            JSON.stringify(parts)
+            "articlesList",
+            JSON.stringify(articles)
         );
+
     }
 
 
-    // Add or update part
-    function addOrUpdatePart() {
+    // Add or update article
+    function addOrUpdateArticle() {
 
-        const partNumber =
-            document.getElementById("partNumber").value.trim();
+        const articleNumber =
+            document
+                .getElementById("articleNumber")
+                .value
+                .trim();
 
-        const partName =
-            document.getElementById("partName").value.trim();
+
+        const articleName =
+            document
+                .getElementById("articleName")
+                .value
+                .trim();
 
 
-        // Validate
-        if (!partNumber) {
+        // Validate article number
+        if (!articleNumber) {
 
-            alert("Please enter a part number.");
+            alert(
+                "Please enter an article number."
+            );
 
-            document.getElementById("partNumber").focus();
+            document
+                .getElementById("articleNumber")
+                .focus();
 
             return;
+
         }
 
 
-        if (!partName) {
+        // Validate article name
+        if (!articleName) {
 
-            alert("Please enter a part name.");
+            alert(
+                "Please enter an article name."
+            );
 
-            document.getElementById("partName").focus();
+            document
+                .getElementById("articleName")
+                .focus();
 
             return;
+
         }
 
 
-        // Update existing part
+        // Update existing article
         if (editingIndex !== -1) {
 
-            parts[editingIndex].partNumber = partNumber;
-            parts[editingIndex].partName = partName;
+            articles[editingIndex].articleNumber =
+                articleNumber;
+
+
+            articles[editingIndex].articleName =
+                articleName;
+
 
             editingIndex = -1;
 
-            document.getElementById("addButton").textContent =
-                "Add Part";
 
-            document.getElementById("cancelButton").style.display =
+            document
+                .getElementById("addButton")
+                .textContent =
+                "Add Article";
+
+
+            document
+                .getElementById("cancelButton")
+                .style.display =
                 "none";
 
         }
 
-        // Add new part
+
+        // Add new article
         else {
 
-            parts.push({
-                partNumber: partNumber,
-                partName: partName
+            articles.push({
+
+                articleNumber:
+                    articleNumber,
+
+                articleName:
+                    articleName
+
             });
+
         }
 
 
-        saveParts();
+        saveArticles();
 
         renderTable();
 
         clearInputs();
 
-        document.getElementById("partNumber").focus();
+
+        document
+            .getElementById("articleNumber")
+            .focus();
+
     }
 
 
     // Clear input fields
     function clearInputs() {
 
-        document.getElementById("partNumber").value = "";
-        document.getElementById("partName").value = "";
+        document
+            .getElementById("articleNumber")
+            .value = "";
+
+
+        document
+            .getElementById("articleName")
+            .value = "";
+
     }
 
 
-    // Edit part
-    function editPart(index) {
+    // Edit article
+    function editArticle(index) {
 
-        const part = parts[index];
+        const article =
+            articles[index];
 
-        document.getElementById("partNumber").value =
-            part.partNumber;
 
-        document.getElementById("partName").value =
-            part.partName;
+        document
+            .getElementById("articleNumber")
+            .value =
+            article.articleNumber;
+
+
+        document
+            .getElementById("articleName")
+            .value =
+            article.articleName;
+
 
         editingIndex = index;
 
-        document.getElementById("addButton").textContent =
-            "Update Part";
 
-        document.getElementById("cancelButton").style.display =
+        document
+            .getElementById("addButton")
+            .textContent =
+            "Update Article";
+
+
+        document
+            .getElementById("cancelButton")
+            .style.display =
             "inline-block";
 
-        document.getElementById("partNumber").focus();
+
+        document
+            .getElementById("articleNumber")
+            .focus();
+
 
         window.scrollTo({
+
             top: 0,
+
             behavior: "smooth"
+
         });
+
     }
 
 
@@ -462,47 +593,70 @@
 
         clearInputs();
 
-        document.getElementById("addButton").textContent =
-            "Add Part";
 
-        document.getElementById("cancelButton").style.display =
+        document
+            .getElementById("addButton")
+            .textContent =
+            "Add Article";
+
+
+        document
+            .getElementById("cancelButton")
+            .style.display =
             "none";
 
-        document.getElementById("partNumber").focus();
+
+        document
+            .getElementById("articleNumber")
+            .focus();
+
     }
 
 
-    // Delete part
-    function deletePart(index) {
+    // Delete article
+    function deleteArticle(index) {
 
-        const part = parts[index];
+        const article =
+            articles[index];
 
-        const confirmed = confirm(
-            "Delete part " +
-            part.partNumber +
-            "?"
-        );
+
+        const confirmed =
+            confirm(
+                "Delete article " +
+                article.articleNumber +
+                "?"
+            );
+
 
         if (!confirmed) {
+
             return;
+
         }
 
-        parts.splice(index, 1);
 
-        saveParts();
+        articles.splice(index, 1);
+
+        saveArticles();
 
         renderTable();
+
     }
 
 
-    // Render table
+    // Render article table
     function renderTable() {
 
         const tbody =
-            document.getElementById("partsTableBody");
+            document
+                .getElementById(
+                    "articlesTableBody"
+                );
+
 
         const search =
-            document.getElementById("searchInput")
+            document
+                .getElementById("searchInput")
                 .value
                 .trim()
                 .toLowerCase();
@@ -511,75 +665,111 @@
         tbody.innerHTML = "";
 
 
-        let visibleParts = parts.filter(function (part) {
+        const visibleArticles =
+            articles.filter(function (article) {
 
-            return (
-                part.partNumber
-                    .toLowerCase()
-                    .includes(search)
-                ||
-                part.partName
-                    .toLowerCase()
-                    .includes(search)
-            );
+                return (
 
-        });
+                    article.articleNumber
+                        .toLowerCase()
+                        .includes(search)
+
+                    ||
+
+                    article.articleName
+                        .toLowerCase()
+                        .includes(search)
+
+                );
+
+            });
 
 
-        document.getElementById("counter").textContent =
-            parts.length;
+        document
+            .getElementById("counter")
+            .textContent =
+            articles.length;
 
 
-        if (visibleParts.length === 0) {
+        if (visibleArticles.length === 0) {
 
-            document.getElementById("emptyMessage")
-                .style.display = "block";
+            document
+                .getElementById("emptyMessage")
+                .style.display =
+                "block";
 
             return;
+
         }
 
 
-        document.getElementById("emptyMessage")
-            .style.display = "none";
+        document
+            .getElementById("emptyMessage")
+            .style.display =
+            "none";
 
 
-        visibleParts.forEach(function (part) {
+        visibleArticles.forEach(
+            function (article) {
 
-            const originalIndex =
-                parts.indexOf(part);
-
-            const row =
-                document.createElement("tr");
+                const originalIndex =
+                    articles.indexOf(article);
 
 
-            row.innerHTML = `
-                <td>${originalIndex + 1}</td>
-
-                <td>${escapeHtml(part.partNumber)}</td>
-
-                <td>${escapeHtml(part.partName)}</td>
-
-                <td class="actions">
-
-                    <button
-                        class="edit-btn"
-                        onclick="editPart(${originalIndex})">
-                        Edit
-                    </button>
-
-                    <button
-                        class="delete-btn"
-                        onclick="deletePart(${originalIndex})">
-                        Delete
-                    </button>
-
-                </td>
-            `;
+                const row =
+                    document.createElement("tr");
 
 
-            tbody.appendChild(row);
+                row.innerHTML = `
 
-        });
+                    <td>
+                        ${originalIndex + 1}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            article.articleNumber
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            article.articleName
+                        )}
+                    </td>
+
+                    <td class="actions">
+
+                        <button
+                            class="edit-btn"
+                            onclick="editArticle(
+                                ${originalIndex}
+                            )">
+
+                            Edit
+
+                        </button>
+
+
+                        <button
+                            class="delete-btn"
+                            onclick="deleteArticle(
+                                ${originalIndex}
+                            )">
+
+                            Delete
+
+                        </button>
+
+                    </td>
+
+                `;
+
+
+                tbody.appendChild(row);
+
+            }
+        );
 
     }
 
@@ -590,43 +780,71 @@
         const div =
             document.createElement("div");
 
+
         div.textContent = value;
 
+
         return div.innerHTML;
+
     }
 
 
     // Export to Excel
     function exportToExcel() {
 
-        if (parts.length === 0) {
+        if (articles.length === 0) {
 
-            alert("There are no parts to export.");
+            alert(
+                "There are no articles to export."
+            );
 
             return;
+
         }
 
 
-        const excelData = parts.map(function (part, index) {
+        const excelData =
+            articles.map(
+                function (article, index) {
 
-            return {
-                "#": index + 1,
-                "Part Number": part.partNumber,
-                "Part Name": part.partName
-            };
+                    return {
 
-        });
+                        "#":
+                            index + 1,
+
+                        "Article Number":
+                            article.articleNumber,
+
+                        "Article Name":
+                            article.articleName
+
+                    };
+
+                }
+            );
 
 
         const worksheet =
-            XLSX.utils.json_to_sheet(excelData);
+            XLSX.utils.json_to_sheet(
+                excelData
+            );
 
 
-        // Set column widths
+        // Set Excel column widths
         worksheet["!cols"] = [
-            { wch: 8 },
-            { wch: 25 },
-            { wch: 45 }
+
+            {
+                wch: 8
+            },
+
+            {
+                wch: 25
+            },
+
+            {
+                wch: 45
+            }
+
         ];
 
 
@@ -635,9 +853,13 @@
 
 
         XLSX.utils.book_append_sheet(
+
             workbook,
+
             worksheet,
-            "Parts"
+
+            "Articles"
+
         );
 
 
@@ -648,41 +870,51 @@
 
 
         XLSX.writeFile(
+
             workbook,
-            "Parts_" + today + ".xlsx"
+
+            "Articles_" +
+            today +
+            ".xlsx"
+
         );
 
     }
 
 
-    // Clear all data
-    function clearAllParts() {
+    // Clear all articles
+    function clearAllArticles() {
 
-        if (parts.length === 0) {
+        if (articles.length === 0) {
 
             return;
+
         }
 
 
-        const confirmed = confirm(
-            "Are you sure you want to delete ALL parts?"
-        );
+        const confirmed =
+            confirm(
+                "Are you sure you want to delete ALL articles?"
+            );
 
 
         if (!confirmed) {
+
             return;
+
         }
 
 
-        parts = [];
+        articles = [];
 
         editingIndex = -1;
 
-        saveParts();
+        saveArticles();
 
         renderTable();
 
         cancelEdit();
+
     }
 
 
@@ -691,28 +923,41 @@
         "keydown",
         function (event) {
 
-            // Enter inside Part Number
+
+            // Enter inside Article Number
             if (
+
                 event.key === "Enter" &&
-                document.activeElement.id === "partNumber"
+
+                document.activeElement.id ===
+                "articleNumber"
+
             ) {
 
                 event.preventDefault();
 
-                document.getElementById("partName").focus();
+
+                document
+                    .getElementById("articleName")
+                    .focus();
 
             }
 
 
-            // Enter inside Part Name
+            // Enter inside Article Name
             else if (
+
                 event.key === "Enter" &&
-                document.activeElement.id === "partName"
+
+                document.activeElement.id ===
+                "articleName"
+
             ) {
 
                 event.preventDefault();
 
-                addOrUpdatePart();
+
+                addOrUpdateArticle();
 
             }
 
@@ -723,4 +968,3 @@
 
 </body>
 </html>
-
