@@ -1,13 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
 
     <title>Article List</title>
 
+
     <!-- SheetJS - Excel export -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
 
     <style>
 
@@ -15,196 +22,315 @@
             box-sizing: border-box;
         }
 
+
         body {
+
             margin: 0;
+
             font-family: Arial, sans-serif;
+
             background: #f4f6f8;
+
             color: #222;
         }
 
+
         .container {
+
             max-width: 1000px;
+
             margin: auto;
+
             padding: 20px;
         }
 
+
         h1 {
+
             text-align: center;
+
             margin-bottom: 25px;
         }
 
+
         .card {
+
             background: white;
+
             border-radius: 12px;
+
             padding: 20px;
+
             margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+
+            box-shadow:
+                0 2px 10px rgba(0, 0, 0, 0.08);
         }
 
+
         .form-row {
+
             display: grid;
-            grid-template-columns: 1fr 1.5fr 1fr auto;
+
+            grid-template-columns:
+                1fr 1.5fr 1fr auto;
+
             gap: 10px;
+
             align-items: end;
         }
 
+
         .field {
+
             display: flex;
+
             flex-direction: column;
         }
 
+
         label {
+
             font-weight: bold;
+
             margin-bottom: 6px;
         }
 
+
         input {
+
             width: 100%;
+
             padding: 13px;
+
             border: 1px solid #ccc;
+
             border-radius: 8px;
+
             font-size: 16px;
         }
 
+
         input:focus {
+
             outline: none;
+
             border-color: #4a44f2;
         }
 
+
         button {
+
             border: none;
+
             border-radius: 8px;
+
             padding: 13px 18px;
+
             font-size: 15px;
+
             font-weight: bold;
+
             cursor: pointer;
         }
 
+
         .add-btn {
+
             background: #4a44f2;
+
             color: white;
         }
 
+
         .add-btn:hover {
+
             background: #3933d8;
         }
 
+
         .export-btn {
+
             background: #198754;
+
             color: white;
         }
+
 
         .clear-btn {
+
             background: #dc3545;
+
             color: white;
         }
 
+
         .cancel-btn {
+
             background: #6c757d;
+
             color: white;
+
             display: none;
         }
 
+
         .table-container {
+
             overflow-x: auto;
         }
 
+
         table {
+
             width: 100%;
+
             border-collapse: collapse;
         }
 
+
         th,
         td {
+
             padding: 12px;
+
             border-bottom: 1px solid #ddd;
+
             text-align: left;
         }
 
+
         th {
+
             background: #f1f3f5;
         }
 
+
         .actions {
+
             white-space: nowrap;
         }
 
+
         .edit-btn {
+
             background: #ffc107;
+
             color: #000;
+
             padding: 8px 12px;
+
             margin-right: 5px;
         }
 
+
         .delete-btn {
+
             background: #dc3545;
+
             color: white;
+
             padding: 8px 12px;
         }
 
+
         .bottom-buttons {
+
             display: flex;
+
             gap: 10px;
+
             justify-content: flex-end;
+
             margin-top: 20px;
         }
 
+
         .counter {
+
             font-weight: bold;
+
             margin-bottom: 10px;
         }
 
+
         .empty {
+
             text-align: center;
+
             padding: 30px;
+
             color: #777;
         }
+
 
         @media (max-width: 750px) {
 
             .container {
+
                 padding: 12px;
             }
 
+
             .form-row {
+
                 grid-template-columns: 1fr;
             }
 
+
             .form-row button {
+
                 width: 100%;
             }
 
+
             h1 {
+
                 font-size: 25px;
             }
 
+
             table {
+
                 min-width: 750px;
             }
 
+
             .bottom-buttons {
+
                 flex-direction: column;
             }
 
+
             .bottom-buttons button {
+
                 width: 100%;
             }
+
         }
 
     </style>
+
 </head>
+
 
 <body>
 
+
 <div class="container">
 
-    <h1>Article List</h1>
+
+    <h1>
+        Article List
+    </h1>
 
 
-    <!-- Add / Edit Article -->
+    <!-- Add / Edit -->
     <div class="card">
 
+
         <div class="form-row">
+
 
             <!-- Article Number -->
             <div class="field">
@@ -252,12 +378,12 @@
                     placeholder="e.g. 1/2"
                     inputmode="numeric"
                     autocomplete="off"
-                    maxlength="4">
+                    maxlength="3">
 
             </div>
 
 
-            <!-- Add button -->
+            <!-- Add -->
             <button
                 id="addButton"
                 class="add-btn"
@@ -268,7 +394,7 @@
             </button>
 
 
-            <!-- Cancel button -->
+            <!-- Cancel -->
             <button
                 id="cancelButton"
                 class="cancel-btn"
@@ -278,6 +404,7 @@
 
             </button>
 
+
         </div>
 
     </div>
@@ -286,11 +413,13 @@
     <!-- Search -->
     <div class="card">
 
+
         <div class="field">
 
             <label for="searchInput">
                 Search
             </label>
+
 
             <input
                 type="text"
@@ -301,29 +430,38 @@
 
         </div>
 
+
     </div>
 
 
-    <!-- Article table -->
+    <!-- Table -->
     <div class="card">
+
 
         <div class="counter">
 
             Total Articles:
-            <span id="counter">0</span>
+
+            <span id="counter">
+                0
+            </span>
 
         </div>
 
 
         <div class="table-container">
 
+
             <table>
+
 
                 <thead>
 
                     <tr>
 
-                        <th>#</th>
+                        <th>
+                            #
+                        </th>
 
                         <th>
                             Article Number
@@ -346,8 +484,10 @@
                 </thead>
 
 
-                <tbody id="articlesTableBody">
+                <tbody
+                    id="articlesTableBody">
                 </tbody>
+
 
             </table>
 
@@ -361,11 +501,13 @@
 
             </div>
 
+
         </div>
 
 
         <!-- Bottom buttons -->
         <div class="bottom-buttons">
+
 
             <button
                 class="export-btn"
@@ -384,17 +526,22 @@
 
             </button>
 
+
         </div>
 
+
     </div>
+
 
 </div>
 
 
 <script>
 
+
     // Store articles
     let articles = [];
+
 
     // Current editing index
     let editingIndex = -1;
@@ -403,18 +550,26 @@
     // Load saved articles
     window.onload = function () {
 
+
         const savedArticles =
-            localStorage.getItem("articlesList");
+            localStorage.getItem(
+                "articlesList"
+            );
 
 
         if (savedArticles) {
 
+
             try {
 
                 articles =
-                    JSON.parse(savedArticles);
+                    JSON.parse(
+                        savedArticles
+                    );
 
-            } catch {
+            }
+
+            catch {
 
                 articles = [];
 
@@ -427,7 +582,9 @@
 
 
         document
-            .getElementById("articleNumber")
+            .getElementById(
+                "articleNumber"
+            )
             .focus();
 
     };
@@ -436,9 +593,15 @@
     // Save articles
     function saveArticles() {
 
+
         localStorage.setItem(
+
             "articlesList",
-            JSON.stringify(articles)
+
+            JSON.stringify(
+                articles
+            )
+
         );
 
     }
@@ -447,23 +610,30 @@
     // Add or update article
     function addOrUpdateArticle() {
 
+
         const articleNumber =
             document
-                .getElementById("articleNumber")
+                .getElementById(
+                    "articleNumber"
+                )
                 .value
                 .trim();
 
 
         const articleName =
             document
-                .getElementById("articleName")
+                .getElementById(
+                    "articleName"
+                )
                 .value
                 .trim();
 
 
         const packageNumber =
             document
-                .getElementById("packageNumber")
+                .getElementById(
+                    "packageNumber"
+                )
                 .value
                 .trim();
 
@@ -471,50 +641,69 @@
         // Article Number is required
         if (!articleNumber) {
 
+
             alert(
                 "Please enter an article number."
             );
 
+
             document
-                .getElementById("articleNumber")
+                .getElementById(
+                    "articleNumber"
+                )
                 .focus();
+
 
             return;
 
         }
 
 
-        // Package must be in format 1/2
+        // Check package format
         if (
+
             packageNumber &&
-            !/^\d+\/\d+$/.test(packageNumber)
+
+            !/^\d\/\d$/.test(
+                packageNumber
+            )
+
         ) {
+
 
             alert(
                 "Package must be in this format: 1/2"
             );
 
+
             document
-                .getElementById("packageNumber")
+                .getElementById(
+                    "packageNumber"
+                )
                 .focus();
+
 
             return;
 
         }
 
 
-        // Update existing article
+        // Update
         if (editingIndex !== -1) {
 
-            articles[editingIndex].articleNumber =
+
+            articles[editingIndex]
+                .articleNumber =
                 articleNumber;
 
 
-            articles[editingIndex].articleName =
+            articles[editingIndex]
+                .articleName =
                 articleName;
 
 
-            articles[editingIndex].packageNumber =
+            articles[editingIndex]
+                .packageNumber =
                 packageNumber;
 
 
@@ -522,21 +711,26 @@
 
 
             document
-                .getElementById("addButton")
+                .getElementById(
+                    "addButton"
+                )
                 .textContent =
                 "Add Article";
 
 
             document
-                .getElementById("cancelButton")
+                .getElementById(
+                    "cancelButton"
+                )
                 .style.display =
                 "none";
 
         }
 
 
-        // Add new article
+        // Add
         else {
+
 
             articles.push({
 
@@ -562,33 +756,42 @@
         renderTable();
 
 
-        // Clear inputs
+        // Clear
         clearInputs();
 
 
-        // Focus Article Number
+        // Focus
         document
-            .getElementById("articleNumber")
+            .getElementById(
+                "articleNumber"
+            )
             .focus();
 
     }
 
 
-    // Clear input fields
+    // Clear inputs
     function clearInputs() {
 
+
         document
-            .getElementById("articleNumber")
+            .getElementById(
+                "articleNumber"
+            )
             .value = "";
 
 
         document
-            .getElementById("articleName")
+            .getElementById(
+                "articleName"
+            )
             .value = "";
 
 
         document
-            .getElementById("packageNumber")
+            .getElementById(
+                "packageNumber"
+            )
             .value = "";
 
     }
@@ -597,24 +800,31 @@
     // Edit article
     function editArticle(index) {
 
+
         const article =
             articles[index];
 
 
         document
-            .getElementById("articleNumber")
+            .getElementById(
+                "articleNumber"
+            )
             .value =
             article.articleNumber;
 
 
         document
-            .getElementById("articleName")
+            .getElementById(
+                "articleName"
+            )
             .value =
             article.articleName;
 
 
         document
-            .getElementById("packageNumber")
+            .getElementById(
+                "packageNumber"
+            )
             .value =
             article.packageNumber || "";
 
@@ -623,19 +833,25 @@
 
 
         document
-            .getElementById("addButton")
+            .getElementById(
+                "addButton"
+            )
             .textContent =
             "Update Article";
 
 
         document
-            .getElementById("cancelButton")
+            .getElementById(
+                "cancelButton"
+            )
             .style.display =
             "inline-block";
 
 
         document
-            .getElementById("articleNumber")
+            .getElementById(
+                "articleNumber"
+            )
             .focus();
 
 
@@ -653,6 +869,7 @@
     // Cancel edit
     function cancelEdit() {
 
+
         editingIndex = -1;
 
 
@@ -660,19 +877,25 @@
 
 
         document
-            .getElementById("addButton")
+            .getElementById(
+                "addButton"
+            )
             .textContent =
             "Add Article";
 
 
         document
-            .getElementById("cancelButton")
+            .getElementById(
+                "cancelButton"
+            )
             .style.display =
             "none";
 
 
         document
-            .getElementById("articleNumber")
+            .getElementById(
+                "articleNumber"
+            )
             .focus();
 
     }
@@ -681,15 +904,20 @@
     // Delete article
     function deleteArticle(index) {
 
+
         const article =
             articles[index];
 
 
         const confirmed =
             confirm(
+
                 "Delete article " +
+
                 article.articleNumber +
+
                 "?"
+
             );
 
 
@@ -700,7 +928,10 @@
         }
 
 
-        articles.splice(index, 1);
+        articles.splice(
+            index,
+            1
+        );
 
 
         saveArticles();
@@ -714,6 +945,7 @@
     // Render table
     function renderTable() {
 
+
         const tbody =
             document
                 .getElementById(
@@ -723,7 +955,9 @@
 
         const search =
             document
-                .getElementById("searchInput")
+                .getElementById(
+                    "searchInput"
+                )
                 .value
                 .trim()
                 .toLowerCase();
@@ -732,10 +966,12 @@
         tbody.innerHTML = "";
 
 
-        // Filter articles
+        // Filter
         const visibleArticles =
             articles.filter(
+
                 function (article) {
+
 
                     return (
 
@@ -743,38 +979,54 @@
                             .toLowerCase()
                             .includes(search)
 
+
                         ||
+
 
                         article.articleName
                             .toLowerCase()
                             .includes(search)
 
+
                         ||
 
-                        (article.packageNumber || "")
+
+                        (
+                            article.packageNumber
+                            || ""
+                        )
                             .toLowerCase()
                             .includes(search)
 
                     );
 
                 }
+
             );
 
 
-        // Update counter
+        // Counter
         document
-            .getElementById("counter")
+            .getElementById(
+                "counter"
+            )
             .textContent =
             articles.length;
 
 
-        // Nothing found
-        if (visibleArticles.length === 0) {
+        // Empty
+        if (
+            visibleArticles.length === 0
+        ) {
+
 
             document
-                .getElementById("emptyMessage")
+                .getElementById(
+                    "emptyMessage"
+                )
                 .style.display =
                 "block";
+
 
             return;
 
@@ -782,21 +1034,29 @@
 
 
         document
-            .getElementById("emptyMessage")
+            .getElementById(
+                "emptyMessage"
+            )
             .style.display =
             "none";
 
 
-        // Display articles
+        // Display
         visibleArticles.forEach(
+
             function (article) {
 
+
                 const originalIndex =
-                    articles.indexOf(article);
+                    articles.indexOf(
+                        article
+                    );
 
 
                 const row =
-                    document.createElement("tr");
+                    document.createElement(
+                        "tr"
+                    );
 
 
                 row.innerHTML = `
@@ -854,16 +1114,20 @@
                 tbody.appendChild(row);
 
             }
+
         );
 
     }
 
 
-    // Prevent HTML injection
+    // Escape HTML
     function escapeHtml(value) {
 
+
         const div =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
 
         div.textContent = value;
@@ -877,11 +1141,16 @@
     // Export to Excel
     function exportToExcel() {
 
-        if (articles.length === 0) {
+
+        if (
+            articles.length === 0
+        ) {
+
 
             alert(
                 "There are no articles to export."
             );
+
 
             return;
 
@@ -890,7 +1159,12 @@
 
         const excelData =
             articles.map(
-                function (article, index) {
+
+                function (
+                    article,
+                    index
+                ) {
+
 
                     return {
 
@@ -909,6 +1183,7 @@
                     };
 
                 }
+
             );
 
 
@@ -975,10 +1250,13 @@
     }
 
 
-    // Clear all articles
+    // Clear all
     function clearAllArticles() {
 
-        if (articles.length === 0) {
+
+        if (
+            articles.length === 0
+        ) {
 
             return;
 
@@ -1000,31 +1278,38 @@
 
         articles = [];
 
+
         editingIndex = -1;
+
 
         saveArticles();
 
+
         renderTable();
+
 
         cancelEdit();
 
     }
 
 
-    // Automatically format Package
+    // Package input
     //
-    // 12   -> 1/2
-    // 23   -> 2/3
-    // 123  -> 1/23
-    // 1234 -> 1/234
+    // 12 -> 1/2
+    // 23 -> 2/3
+    // 34 -> 3/4
     //
+    // Only two numbers are allowed.
     document
-        .getElementById("packageNumber")
+        .getElementById(
+            "packageNumber"
+        )
         .addEventListener(
             "input",
             function () {
 
-                // Remove everything except numbers
+
+                // Keep numbers only
                 let value =
                     this.value.replace(
                         /[^0-9]/g,
@@ -1032,24 +1317,32 @@
                     );
 
 
-                // Limit length
+                // Only two digits
                 value =
-                    value.substring(0, 4);
+                    value.substring(
+                        0,
+                        2
+                    );
 
 
-                // Add slash after first digit
-                if (value.length >= 2) {
+                // Add slash
+                if (
+                    value.length === 2
+                ) {
+
 
                     this.value =
                         value.charAt(0) +
                         "/" +
-                        value.substring(1);
+                        value.charAt(1);
 
                 }
 
                 else {
 
-                    this.value = value;
+
+                    this.value =
+                        value;
 
                 }
 
@@ -1073,17 +1366,23 @@
 
             ) {
 
+
                 event.preventDefault();
 
 
                 const articleName =
                     document
-                        .getElementById("articleName")
+                        .getElementById(
+                            "articleName"
+                        )
                         .value
                         .trim();
 
 
-                if (articleName === "") {
+                if (
+                    articleName === ""
+                ) {
+
 
                     addOrUpdateArticle();
 
@@ -1091,8 +1390,11 @@
 
                 else {
 
+
                     document
-                        .getElementById("articleName")
+                        .getElementById(
+                            "articleName"
+                        )
                         .focus();
 
                 }
@@ -1110,11 +1412,14 @@
 
             ) {
 
+
                 event.preventDefault();
 
 
                 document
-                    .getElementById("packageNumber")
+                    .getElementById(
+                        "packageNumber"
+                    )
                     .focus();
 
             }
@@ -1130,6 +1435,7 @@
 
             ) {
 
+
                 event.preventDefault();
 
 
@@ -1140,8 +1446,11 @@
         }
     );
 
+
 </script>
 
+
 </body>
+
 </html>
 
