@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Part List</title>
+
+    <!-- SheetJS - Excel export -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #222;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr auto;
+            gap: 10px;
+            align-items: end;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #4a44f2;
+        }
+
+        button {
+            border: none;
+            border-radius: 8px;
+            padding: 13px 18px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .add-btn {
+            background: #4a44f2;
+            color: white;
+        }
+
+        .add-btn:hover {
+            background: #3933d8;
+        }
+
+        .export-btn {
+            background: #198754;
+            color: white;
+        }
+
+        .clear-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .cancel-btn {
+            background: #6c757d;
+            color: white;
+            display: none;
+        }
+
+        .search {
+            margin-bottom: 15px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f3f5;
+        }
+
+        .actions {
+            white-space: nowrap;
+        }
+
+        .edit-btn {
+            background: #ffc107;
+            color: #000;
+            padding: 8px 12px;
+            margin-right: 5px;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            padding: 8px 12px;
+        }
+
+        .bottom-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .counter {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #777;
+        }
+
+        @media (max-width: 650px) {
+
+            .container {
+                padding: 12px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row button {
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 25px;
+            }
+
+            table {
+                min-width: 600px;
+            }
+
+            .bottom-buttons {
+                flex-direction: column;
+            }
+
+            .bottom-buttons button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Part List</h1>
+
+    <!-- Add / Edit -->
+    <div class="card">
+
+        <div class="form-row">
+
+            <div class="field">
+                <label for="partNumber">Part Number</label>
+                <input
+                    type="text"
+                    id="partNumber"
+                    placeholder="Enter part number"
+                    autocomplete="off">
+            </div>
+
+            <div class="field">
+                <label for="partName">Part Name</label>
+                <input
+                    type="text"
+                    id="partName"
+                    placeholder="Enter part name"
+                    autocomplete="off">
+            </div>
+
+            <button
+                id="addButton"
+                class="add-btn"
+                onclick="addOrUpdatePart()">
+                Add Part
+            </button>
+
+            <button
+                id="cancelButton"
+                class="cancel-btn"
+                onclick="cancelEdit()">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- Search -->
+    <div class="card">
+
+        <div class="field">
+            <label for="searchInput">Search</label>
+
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search by part number or name..."
+                autocomplete="off"
+                oninput="renderTable()">
+        </div>
+
+    </div>
+
+    <!-- List -->
+    <div class="card">
+
+        <div class="counter">
+            Total Parts: <span id="counter">0</span>
+        </div>
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Part Number</th>
+                        <th>Part Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="partsTableBody">
+                </tbody>
+
+            </table>
+
+            <div
+                id="emptyMessage"
+                class="empty"
+                style="display:none;">
+                No parts found.
+            </div>
+
+        </div>
+
+        <div class="bottom-buttons">
+
+            <button
+                class="export-btn"
+                onclick="exportToExcel()">
+                Export to Excel
+            </button>
+
+            <button
+                class="clear-btn"
+                onclick="clearAllParts()">
+                Clear All
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    // Store all parts
+    let parts = [];
+
+    // Index of the part currently being edited
+    let editingIndex = -1;
+
+
+    // Load saved data when page starts
+    window.onload = function () {
+
+        const savedParts = localStorage.getItem("partsList");
+
+        if (savedParts) {
+            try {
+                parts = JSON.parse(savedParts);
+            } catch {
+                parts = [];
+            }
+        }
+
+        renderTable();
+
+        document.getElementById("partNumber").focus();
+    };
+
+
+    // Save data to browser
+    function saveParts() {
+
+        localStorage.setItem(
+            "partsList",
+            JSON.stringify(parts)
+        );
+    }
+
+
+    // Add or update part
+    function addOrUpdatePart() {
+
+        const partNumber =
+            document.getElementById("partNumber").value.trim();
+
+        const partName =
+            document.getElementById("partName").value.trim();
+
+
+        // Validate
+        if (!partNumber) {
+
+            alert("Please enter a part number.");
+
+            document.getElementById("partNumber").focus();
+
+            return;
+        }
+
+
+        if (!partName) {
+
+            alert("Please enter a part name.");
+
+            document.getElementById("partName").focus();
+
+            return;
+        }
+
+
+        // Update existing part
+        if (editingIndex !== -1) {
+
+            parts[editingIndex].partNumber = partNumber;
+            parts[editingIndex].partName = partName;
+
+            editingIndex = -1;
+
+            document.getElementById("addButton").textContent =
+                "Add Part";
+
+            document.getElementById("cancelButton").style.display =
+                "none";
+
+        }
+
+        // Add new part
+        else {
+
+            parts.push({
+                partNumber: partNumber,
+                partName: partName
+            });
+        }
+
+
+        saveParts();
+
+        renderTable();
+
+        clearInputs();
+
+        document.getElementById("partNumber").focus();
+    }
+
+
+    // Clear input fields
+    function clearInputs() {
+
+        document.getElementById("partNumber").value = "";
+        document.getElementById("partName").value = "";
+    }
+
+
+    // Edit part
+    function editPart(index) {
+
+        const part = parts[index];
+
+        document.getElementById("partNumber").value =
+            part.partNumber;
+
+        document.getElementById("partName").value =
+            part.partName;
+
+        editingIndex = index;
+
+        document.getElementById("addButton").textContent =
+            "Update Part";
+
+        document.getElementById("cancelButton").style.display =
+            "inline-block";
+
+        document.getElementById("partNumber").focus();
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }
+
+
+    // Cancel editing
+    function cancelEdit() {
+
+        editingIndex = -1;
+
+        clearInputs();
+
+        document.getElementById("addButton").textContent =
+            "Add Part";
+
+        document.getElementById("cancelButton").style.display =
+            "none";
+
+        document.getElementById("partNumber").focus();
+    }
+
+
+    // Delete part
+    function deletePart(index) {
+
+        const part = parts[index];
+
+        const confirmed = confirm(
+            "Delete part " +
+            part.partNumber +
+            "?"
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        parts.splice(index, 1);
+
+        saveParts();
+
+        renderTable();
+    }
+
+
+    // Render table
+    function renderTable() {
+
+        const tbody =
+            document.getElementById("partsTableBody");
+
+        const search =
+            document.getElementById("searchInput")
+                .value
+                .trim()
+                .toLowerCase();
+
+
+        tbody.innerHTML = "";
+
+
+        let visibleParts = parts.filter(function (part) {
+
+            return (
+                part.partNumber
+                    .toLowerCase()
+                    .includes(search)
+                ||
+                part.partName
+                    .toLowerCase()
+                    .includes(search)
+            );
+
+        });
+
+
+        document.getElementById("counter").textContent =
+            parts.length;
+
+
+        if (visibleParts.length === 0) {
+
+            document.getElementById("emptyMessage")
+                .style.display = "block";
+
+            return;
+        }
+
+
+        document.getElementById("emptyMessage")
+            .style.display = "none";
+
+
+        visibleParts.forEach(function (part) {
+
+            const originalIndex =
+                parts.indexOf(part);
+
+            const row =
+                document.createElement("tr");
+
+
+            row.innerHTML = `
+                <td>${originalIndex + 1}</td>
+
+                <td>${escapeHtml(part.partNumber)}</td>
+
+                <td>${escapeHtml(part.partName)}</td>
+
+                <td class="actions">
+
+                    <button
+                        class="edit-btn"
+                        onclick="editPart(${originalIndex})">
+                        Edit
+                    </button>
+
+                    <button
+                        class="delete-btn"
+                        onclick="deletePart(${originalIndex})">
+                        Delete
+                    </button>
+
+                </td>
+            `;
+
+
+            tbody.appendChild(row);
+
+        });
+
+    }
+
+
+    // Protect table from HTML injection
+    function escapeHtml(value) {
+
+        const div =
+            document.createElement("div");
+
+        div.textContent = value;
+
+        return div.innerHTML;
+    }
+
+
+    // Export to Excel
+    function exportToExcel() {
+
+        if (parts.length === 0) {
+
+            alert("There are no parts to export.");
+
+            return;
+        }
+
+
+        const excelData = parts.map(function (part, index) {
+
+            return {
+                "#": index + 1,
+                "Part Number": part.partNumber,
+                "Part Name": part.partName
+            };
+
+        });
+
+
+        const worksheet =
+            XLSX.utils.json_to_sheet(excelData);
+
+
+        // Set column widths
+        worksheet["!cols"] = [
+            { wch: 8 },
+            { wch: 25 },
+            { wch: 45 }
+        ];
+
+
+        const workbook =
+            XLSX.utils.book_new();
+
+
+        XLSX.utils.book_append_sheet(
+            workbook,
+            worksheet,
+            "Parts"
+        );
+
+
+        const today =
+            new Date()
+                .toISOString()
+                .slice(0, 10);
+
+
+        XLSX.writeFile(
+            workbook,
+            "Parts_" + today + ".xlsx"
+        );
+
+    }
+
+
+    // Clear all data
+    function clearAllParts() {
+
+        if (parts.length === 0) {
+
+            return;
+        }
+
+
+        const confirmed = confirm(
+            "Are you sure you want to delete ALL parts?"
+        );
+
+
+        if (!confirmed) {
+            return;
+        }
+
+
+        parts = [];
+
+        editingIndex = -1;
+
+        saveParts();
+
+        renderTable();
+
+        cancelEdit();
+    }
+
+
+    // Keyboard shortcuts
+    document.addEventListener(
+        "keydown",
+        function (event) {
+
+            // Enter inside Part Number
+            if (
+                event.key === "Enter" &&
+                document.activeElement.id === "partNumber"
+            ) {
+
+                event.preventDefault();
+
+                document.getElementById("partName").focus();
+
+            }
+
+
+            // Enter inside Part Name
+            else if (
+                event.key === "Enter" &&
+                document.activeElement.id === "partName"
+            ) {
+
+                event.preventDefault();
+
+                addOrUpdatePart();
+
+            }
+
+        }
+    );
+
+</script>
+
+</body>
+</html>
+
