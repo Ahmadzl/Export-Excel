@@ -12,7 +12,7 @@
     <title>Article List</title>
 
 
-    <!-- SheetJS - Excel export -->
+    <!-- SheetJS - Excel import and export -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 
@@ -198,6 +198,14 @@
         }
 
 
+        .open-excel-btn {
+
+            background: #0d6efd;
+
+            color: white;
+        }
+
+
         .clear-btn {
 
             background: #dc3545;
@@ -284,6 +292,8 @@
             justify-content: flex-end;
 
             margin-top: 20px;
+
+            flex-wrap: wrap;
         }
 
 
@@ -302,6 +312,13 @@
             padding: 30px;
 
             color: #777;
+        }
+
+
+        /* Hidden Excel file input */
+        #excelFileInput {
+
+            display: none;
         }
 
 
@@ -571,10 +588,29 @@
         </div>
 
 
+        <!-- Excel file input -->
+        <input
+            type="file"
+            id="excelFileInput"
+            accept=".xlsx,.xls"
+            onchange="importFromExcel(event)">
+
+
         <!-- Bottom buttons -->
         <div class="bottom-buttons">
 
 
+            <!-- Open Excel -->
+            <button
+                class="open-excel-btn"
+                onclick="openExcelFile()">
+
+                Open Excel
+
+            </button>
+
+
+            <!-- Export Excel -->
             <button
                 class="export-btn"
                 onclick="exportToExcel()">
@@ -584,6 +620,7 @@
             </button>
 
 
+            <!-- Clear -->
             <button
                 class="clear-btn"
                 onclick="clearAllArticles()">
@@ -695,7 +732,7 @@
                 .trim();
 
 
-        // If both fields have values
+        // Both fields have values
         if (
             first &&
             second
@@ -706,7 +743,7 @@
         }
 
 
-        // If only first field has value
+        // Only first field
         if (first) {
 
             return first;
@@ -714,7 +751,7 @@
         }
 
 
-        // If only second field has value
+        // Only second field
         if (second) {
 
             return second;
@@ -792,7 +829,7 @@
         }
 
 
-        // Only numbers are allowed in first part
+        // First part must contain only numbers
         if (
             first &&
             !/^[0-9]+$/.test(first)
@@ -816,7 +853,7 @@
         }
 
 
-        // Only numbers are allowed in second part
+        // Second part must contain only numbers
         if (
             second &&
             !/^[0-9]+$/.test(second)
@@ -840,7 +877,7 @@
         }
 
 
-        // Package must be in format 1/2
+        // Package validation
         if (
 
             packageNumber &&
@@ -935,15 +972,15 @@
         saveArticles();
 
 
-        // Refresh table
+        // Refresh
         renderTable();
 
 
-        // Clear inputs
+        // Clear
         clearInputs();
 
 
-        // Focus first Article Number field
+        // Focus
         document
             .getElementById(
                 "articleNumberFirst"
@@ -999,7 +1036,7 @@
             article.articleNumber || "";
 
 
-        // Split Article Number at -
+        // Split at hyphen
         const parts =
             articleNumber.split("-");
 
@@ -1025,7 +1062,7 @@
                 "articleName"
             )
             .value =
-            article.articleName;
+            article.articleName || "";
 
 
         document
@@ -1173,7 +1210,7 @@
         tbody.innerHTML = "";
 
 
-        // Filter articles
+        // Filter
         const visibleArticles =
             articles.filter(
 
@@ -1182,7 +1219,10 @@
 
                     return (
 
-                        article.articleNumber
+                        (
+                            article.articleNumber
+                            || ""
+                        )
                             .toLowerCase()
                             .includes(search)
 
@@ -1190,7 +1230,10 @@
                         ||
 
 
-                        article.articleName
+                        (
+                            article.articleName
+                            || ""
+                        )
                             .toLowerCase()
                             .includes(search)
 
@@ -1212,7 +1255,7 @@
             );
 
 
-        // Update counter
+        // Counter
         document
             .getElementById(
                 "counter"
@@ -1221,7 +1264,7 @@
             articles.length;
 
 
-        // Nothing found
+        // Empty
         if (
             visibleArticles.length === 0
         ) {
@@ -1280,7 +1323,7 @@
 
                     <td>
                         ${escapeHtml(
-                            article.articleName
+                            article.articleName || ""
                         )}
                     </td>
 
@@ -1345,7 +1388,440 @@
     }
 
 
-    // Export to Excel
+    // ==========================================
+    // OPEN EXCEL
+    // ==========================================
+
+    function openExcelFile() {
+
+
+        document
+            .getElementById(
+                "excelFileInput"
+            )
+            .click();
+
+    }
+
+
+    // ==========================================
+    // IMPORT EXCEL
+    // ==========================================
+
+    function importFromExcel(event) {
+
+
+        const file =
+            event.target.files[0];
+
+
+        if (!file) {
+
+            return;
+
+        }
+
+
+        const reader =
+            new FileReader();
+
+
+        reader.onload =
+            function (e) {
+
+
+                try {
+
+
+                    const data =
+                        new Uint8Array(
+                            e.target.result
+                        );
+
+
+                    const workbook =
+                        XLSX.read(
+                            data,
+                            {
+                                type: "array"
+                            }
+                        );
+
+
+                    // Get first sheet
+                    const firstSheetName =
+                        workbook.SheetNames[0];
+
+
+                    const worksheet =
+                        workbook.Sheets[
+                            firstSheetName
+                        ];
+
+
+                    // Convert Excel to objects
+                    const rows =
+                        XLSX.utils.sheet_to_json(
+                            worksheet,
+                            {
+                                defval: "",
+                                raw: false
+                            }
+                        );
+
+
+                    if (
+                        rows.length === 0
+                    ) {
+
+
+                        alert(
+                            "The Excel file is empty."
+                        );
+
+
+                        resetExcelInput();
+
+
+                        return;
+
+                    }
+
+
+                    let importedCount = 0;
+
+                    let updatedCount = 0;
+
+                    let skippedCount = 0;
+
+
+                    rows.forEach(
+
+                        function (row) {
+
+
+                            // Find columns
+                            // case-insensitive
+                            const articleNumberKey =
+                                findColumn(
+                                    row,
+                                    "Article Number"
+                                );
+
+
+                            const articleNameKey =
+                                findColumn(
+                                    row,
+                                    "Article Name"
+                                );
+
+
+                            const packageKey =
+                                findColumn(
+                                    row,
+                                    "Package"
+                                );
+
+
+                            // Article Number required
+                            if (
+                                !articleNumberKey
+                            ) {
+
+                                skippedCount++;
+
+                                return;
+
+                            }
+
+
+                            let articleNumber =
+                                String(
+                                    row[
+                                        articleNumberKey
+                                    ] || ""
+                                )
+                                    .trim();
+
+
+                            const articleName =
+                                String(
+                                    articleNameKey
+                                        ? row[
+                                            articleNameKey
+                                        ]
+                                        : ""
+                                )
+                                    .trim();
+
+
+                            const packageNumber =
+                                String(
+                                    packageKey
+                                        ? row[
+                                            packageKey
+                                        ]
+                                        : ""
+                                )
+                                    .trim();
+
+
+                            // Skip empty article
+                            // numbers
+                            if (
+                                !articleNumber
+                            ) {
+
+                                skippedCount++;
+
+                                return;
+
+                            }
+
+
+                            // Clean Article Number
+                            articleNumber =
+                                articleNumber.replace(
+                                    /\s+/g,
+                                    ""
+                                );
+
+
+                            // Clean package
+                            let cleanPackage =
+                                packageNumber.replace(
+                                    /\s+/g,
+                                    ""
+                                );
+
+
+                            // Check package
+                            if (
+
+                                cleanPackage &&
+
+                                !/^\d\/\d$/.test(
+                                    cleanPackage
+                                )
+
+                            ) {
+
+
+                                // Try to convert
+                                // 12 -> 1/2
+                                const packageDigits =
+                                    cleanPackage.replace(
+                                        /[^0-9]/g,
+                                        ""
+                                    );
+
+
+                                if (
+                                    packageDigits.length === 2
+                                ) {
+
+                                    cleanPackage =
+                                        packageDigits.charAt(0) +
+                                        "/" +
+                                        packageDigits.charAt(1);
+
+                                }
+
+                                else {
+
+                                    cleanPackage = "";
+
+                                }
+
+                            }
+
+
+                            // Check if article exists
+                            const existingIndex =
+                                articles.findIndex(
+
+                                    function (
+                                        article
+                                    ) {
+
+                                        return (
+
+                                            String(
+                                                article.articleNumber
+                                            )
+                                                .trim()
+                                                .toLowerCase() ===
+                                            articleNumber
+                                                .toLowerCase()
+
+                                        );
+
+                                    }
+
+                                );
+
+
+                            // Update existing
+                            if (
+                                existingIndex !== -1
+                            ) {
+
+
+                                articles[
+                                    existingIndex
+                                ]
+                                    .articleName =
+                                    articleName;
+
+
+                                articles[
+                                    existingIndex
+                                ]
+                                    .packageNumber =
+                                    cleanPackage;
+
+
+                                updatedCount++;
+
+                            }
+
+
+                            // Add new
+                            else {
+
+
+                                articles.push({
+
+                                    articleNumber:
+                                        articleNumber,
+
+                                    articleName:
+                                        articleName,
+
+                                    packageNumber:
+                                        cleanPackage
+
+                                });
+
+
+                                importedCount++;
+
+                            }
+
+                        }
+
+                    );
+
+
+                    // Save
+                    saveArticles();
+
+
+                    // Refresh table
+                    renderTable();
+
+
+                    // Show result
+                    alert(
+
+                        "Excel imported successfully.\n\n" +
+
+                        "New articles: " +
+                        importedCount +
+
+                        "\nUpdated articles: " +
+                        updatedCount +
+
+                        "\nSkipped rows: " +
+                        skippedCount
+
+                    );
+
+
+                }
+
+                catch (error) {
+
+
+                    console.error(
+                        error
+                    );
+
+
+                    alert(
+                        "Could not read the Excel file."
+                    );
+
+                }
+
+
+                // Reset file input
+                resetExcelInput();
+
+            };
+
+
+        reader.readAsArrayBuffer(
+            file
+        );
+
+    }
+
+
+    // Find Excel column
+    function findColumn(
+        row,
+        wantedName
+    ) {
+
+
+        const wanted =
+            wantedName
+                .trim()
+                .toLowerCase();
+
+
+        const key =
+            Object.keys(row).find(
+
+                function (column) {
+
+                    return (
+
+                        column
+                            .trim()
+                            .toLowerCase() ===
+                        wanted
+
+                    );
+
+                }
+
+            );
+
+
+        return key || null;
+
+    }
+
+
+    // Reset file input
+    function resetExcelInput() {
+
+
+        document
+            .getElementById(
+                "excelFileInput"
+            )
+            .value = "";
+
+    }
+
+
+    // ==========================================
+    // EXPORT TO EXCEL
+    // ==========================================
+
     function exportToExcel() {
 
 
@@ -1382,7 +1858,7 @@
                             article.articleNumber,
 
                         "Article Name":
-                            article.articleName,
+                            article.articleName || "",
 
                         "Package":
                             article.packageNumber || ""
@@ -1457,7 +1933,10 @@
     }
 
 
-    // Clear all articles
+    // ==========================================
+    // CLEAR ALL
+    // ==========================================
+
     function clearAllArticles() {
 
 
@@ -1500,7 +1979,10 @@
     }
 
 
-    // Allow only numbers in Article Number fields
+    // ==========================================
+    // ARTICLE NUMBER INPUTS
+    // ==========================================
+
     document
         .getElementById(
             "articleNumberFirst"
@@ -1509,6 +1991,8 @@
             "input",
             function () {
 
+
+                // Numbers only
                 this.value =
                     this.value.replace(
                         /[^0-9]/g,
@@ -1527,6 +2011,8 @@
             "input",
             function () {
 
+
+                // Numbers only
                 this.value =
                     this.value.replace(
                         /[^0-9]/g,
@@ -1537,36 +2023,10 @@
         );
 
 
-    // Move automatically from first
-    // Article Number box to second box
-    document
-        .getElementById(
-            "articleNumberFirst"
-        )
-        .addEventListener(
-            "input",
-            function () {
+    // ==========================================
+    // PACKAGE INPUT
+    // ==========================================
 
-                if (
-                    this.value.length > 0
-                ) {
-
-                    // User can press Tab or
-                    // continue manually.
-
-                }
-
-            }
-        );
-
-
-    // Package input
-    //
-    // 12 -> 1/2
-    // 23 -> 2/3
-    // 34 -> 3/4
-    //
-    // Only two numbers are allowed.
     document
         .getElementById(
             "packageNumber"
@@ -1584,7 +2044,7 @@
                     );
 
 
-                // Allow only two numbers
+                // Maximum two digits
                 value =
                     value.substring(
                         0,
@@ -1617,7 +2077,10 @@
         );
 
 
-    // Keyboard handling
+    // ==========================================
+    // KEYBOARD HANDLING
+    // ==========================================
+
     document.addEventListener(
         "keydown",
         function (event) {
