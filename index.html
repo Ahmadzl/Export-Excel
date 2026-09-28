@@ -325,7 +325,7 @@
     </h1>
 
 
-    <!-- Add / Edit -->
+    <!-- Add / Edit Article -->
     <div class="card">
 
 
@@ -342,7 +342,7 @@
                 <input
                     type="text"
                     id="articleNumber"
-                    placeholder="Enter article number"
+                    placeholder="e.g. 123-456"
                     inputmode="numeric"
                     autocomplete="off">
 
@@ -383,7 +383,7 @@
             </div>
 
 
-            <!-- Add -->
+            <!-- Add button -->
             <button
                 id="addButton"
                 class="add-btn"
@@ -394,7 +394,7 @@
             </button>
 
 
-            <!-- Cancel -->
+            <!-- Cancel button -->
             <button
                 id="cancelButton"
                 class="cancel-btn"
@@ -434,7 +434,7 @@
     </div>
 
 
-    <!-- Table -->
+    <!-- Article table -->
     <div class="card">
 
 
@@ -659,7 +659,32 @@
         }
 
 
-        // Check package format
+        // Article Number must contain only numbers and hyphens
+        if (
+            !/^[0-9-]+$/.test(
+                articleNumber
+            )
+        ) {
+
+
+            alert(
+                "Article Number can contain only numbers and -"
+            );
+
+
+            document
+                .getElementById(
+                    "articleNumber"
+                )
+                .focus();
+
+
+            return;
+
+        }
+
+
+        // Package must be in format 1/2
         if (
 
             packageNumber &&
@@ -688,8 +713,10 @@
         }
 
 
-        // Update
-        if (editingIndex !== -1) {
+        // Update existing article
+        if (
+            editingIndex !== -1
+        ) {
 
 
             articles[editingIndex]
@@ -728,7 +755,7 @@
         }
 
 
-        // Add
+        // Add new article
         else {
 
 
@@ -756,11 +783,11 @@
         renderTable();
 
 
-        // Clear
+        // Clear inputs
         clearInputs();
 
 
-        // Focus
+        // Focus Article Number
         document
             .getElementById(
                 "articleNumber"
@@ -770,7 +797,7 @@
     }
 
 
-    // Clear inputs
+    // Clear input fields
     function clearInputs() {
 
 
@@ -966,7 +993,7 @@
         tbody.innerHTML = "";
 
 
-        // Filter
+        // Filter articles
         const visibleArticles =
             articles.filter(
 
@@ -1005,7 +1032,7 @@
             );
 
 
-        // Counter
+        // Update counter
         document
             .getElementById(
                 "counter"
@@ -1014,7 +1041,7 @@
             articles.length;
 
 
-        // Empty
+        // Nothing found
         if (
             visibleArticles.length === 0
         ) {
@@ -1041,7 +1068,7 @@
             "none";
 
 
-        // Display
+        // Display articles
         visibleArticles.forEach(
 
             function (article) {
@@ -1120,7 +1147,7 @@
     }
 
 
-    // Escape HTML
+    // Prevent HTML injection
     function escapeHtml(value) {
 
 
@@ -1250,7 +1277,7 @@
     }
 
 
-    // Clear all
+    // Clear all articles
     function clearAllArticles() {
 
 
@@ -1293,6 +1320,46 @@
     }
 
 
+    // Article Number input
+    //
+    // Allows:
+    // 123456
+    // 123-456
+    // 12-34-56
+    //
+    // Hyphen is optional.
+    document
+        .getElementById(
+            "articleNumber"
+        )
+        .addEventListener(
+            "input",
+            function () {
+
+
+                // Keep only numbers and hyphens
+                let value =
+                    this.value.replace(
+                        /[^0-9-]/g,
+                        ""
+                    );
+
+
+                // Prevent multiple hyphens together
+                value =
+                    value.replace(
+                        /-+/g,
+                        "-"
+                    );
+
+
+                this.value =
+                    value;
+
+            }
+        );
+
+
     // Package input
     //
     // 12 -> 1/2
@@ -1317,7 +1384,7 @@
                     );
 
 
-                // Only two digits
+                // Allow only two numbers
                 value =
                     value.substring(
                         0,
@@ -1325,7 +1392,7 @@
                     );
 
 
-                // Add slash
+                // Add slash between the numbers
                 if (
                     value.length === 2
                 ) {
@@ -1453,4 +1520,3 @@
 </body>
 
 </html>
-
