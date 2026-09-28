@@ -10,6 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
     <style>
+
         * {
             box-sizing: border-box;
         }
@@ -189,6 +190,7 @@
                 width: 100%;
             }
         }
+
     </style>
 </head>
 
@@ -198,11 +200,13 @@
 
     <h1>Article List</h1>
 
-    <!-- Add / Edit -->
+
+    <!-- Add / Edit Article -->
     <div class="card">
 
         <div class="form-row">
 
+            <!-- Article Number -->
             <div class="field">
 
                 <label for="articleNumber">
@@ -219,6 +223,7 @@
             </div>
 
 
+            <!-- Article Name -->
             <div class="field">
 
                 <label for="articleName">
@@ -228,12 +233,13 @@
                 <input
                     type="text"
                     id="articleName"
-                    placeholder="Enter article name"
+                    placeholder="Optional"
                     autocomplete="off">
 
             </div>
 
 
+            <!-- Add button -->
             <button
                 id="addButton"
                 class="add-btn"
@@ -244,6 +250,7 @@
             </button>
 
 
+            <!-- Cancel button -->
             <button
                 id="cancelButton"
                 class="cancel-btn"
@@ -279,7 +286,7 @@
     </div>
 
 
-    <!-- Article List -->
+    <!-- Article table -->
     <div class="card">
 
         <div class="counter">
@@ -335,6 +342,7 @@
         </div>
 
 
+        <!-- Bottom buttons -->
         <div class="bottom-buttons">
 
             <button
@@ -363,14 +371,14 @@
 
 <script>
 
-    // Store all articles
+    // Store articles
     let articles = [];
 
-    // Index of the article currently being edited
+    // Current editing index
     let editingIndex = -1;
 
 
-    // Load saved data when page starts
+    // Load saved articles
     window.onload = function () {
 
         const savedArticles =
@@ -403,7 +411,7 @@
     };
 
 
-    // Save data to browser
+    // Save articles
     function saveArticles() {
 
         localStorage.setItem(
@@ -431,7 +439,7 @@
                 .trim();
 
 
-        // Validate article number
+        // Article Number is required
         if (!articleNumber) {
 
             alert(
@@ -440,22 +448,6 @@
 
             document
                 .getElementById("articleNumber")
-                .focus();
-
-            return;
-
-        }
-
-
-        // Validate article name
-        if (!articleName) {
-
-            alert(
-                "Please enter an article name."
-            );
-
-            document
-                .getElementById("articleName")
                 .focus();
 
             return;
@@ -507,13 +499,19 @@
         }
 
 
+        // Save
         saveArticles();
 
+
+        // Refresh table
         renderTable();
 
+
+        // Clear inputs
         clearInputs();
 
 
+        // Focus Article Number
         document
             .getElementById("articleNumber")
             .focus();
@@ -586,10 +584,11 @@
     }
 
 
-    // Cancel editing
+    // Cancel edit
     function cancelEdit() {
 
         editingIndex = -1;
+
 
         clearInputs();
 
@@ -637,14 +636,16 @@
 
         articles.splice(index, 1);
 
+
         saveArticles();
+
 
         renderTable();
 
     }
 
 
-    // Render article table
+    // Render table
     function renderTable() {
 
         const tbody =
@@ -665,32 +666,37 @@
         tbody.innerHTML = "";
 
 
+        // Filter articles
         const visibleArticles =
-            articles.filter(function (article) {
+            articles.filter(
+                function (article) {
 
-                return (
+                    return (
 
-                    article.articleNumber
-                        .toLowerCase()
-                        .includes(search)
+                        article.articleNumber
+                            .toLowerCase()
+                            .includes(search)
 
-                    ||
+                        ||
 
-                    article.articleName
-                        .toLowerCase()
-                        .includes(search)
+                        article.articleName
+                            .toLowerCase()
+                            .includes(search)
 
-                );
+                    );
 
-            });
+                }
+            );
 
 
+        // Update counter
         document
             .getElementById("counter")
             .textContent =
             articles.length;
 
 
+        // Nothing found
         if (visibleArticles.length === 0) {
 
             document
@@ -709,6 +715,7 @@
             "none";
 
 
+        // Display articles
         visibleArticles.forEach(
             function (article) {
 
@@ -774,7 +781,7 @@
     }
 
 
-    // Protect table from HTML injection
+    // Prevent HTML injection
     function escapeHtml(value) {
 
         const div =
@@ -830,7 +837,7 @@
             );
 
 
-        // Set Excel column widths
+        // Excel column widths
         worksheet["!cols"] = [
 
             {
@@ -863,6 +870,7 @@
         );
 
 
+        // File name
         const today =
             new Date()
                 .toISOString()
@@ -907,24 +915,34 @@
 
         articles = [];
 
+
         editingIndex = -1;
+
 
         saveArticles();
 
+
         renderTable();
+
 
         cancelEdit();
 
     }
 
 
-    // Keyboard shortcuts
+    // Keyboard handling
     document.addEventListener(
         "keydown",
         function (event) {
 
 
-            // Enter inside Article Number
+            // Enter in Article Number
+            //
+            // If the Article Name is empty,
+            // save immediately.
+            //
+            // If Article Name has text,
+            // move to Article Name.
             if (
 
                 event.key === "Enter" &&
@@ -937,14 +955,31 @@
                 event.preventDefault();
 
 
-                document
-                    .getElementById("articleName")
-                    .focus();
+                const articleName =
+                    document
+                        .getElementById("articleName")
+                        .value
+                        .trim();
+
+
+                if (articleName === "") {
+
+                    addOrUpdateArticle();
+
+                }
+
+                else {
+
+                    document
+                        .getElementById("articleName")
+                        .focus();
+
+                }
 
             }
 
 
-            // Enter inside Article Name
+            // Enter in Article Name
             else if (
 
                 event.key === "Enter" &&
