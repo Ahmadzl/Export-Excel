@@ -239,7 +239,7 @@
             </div>
 
 
-            <!-- Package Number -->
+            <!-- Package -->
             <div class="field">
 
                 <label for="packageNumber">
@@ -251,7 +251,8 @@
                     id="packageNumber"
                     placeholder="e.g. 1/2"
                     inputmode="numeric"
-                    autocomplete="off">
+                    autocomplete="off"
+                    maxlength="4">
 
             </div>
 
@@ -483,7 +484,7 @@
         }
 
 
-        // Package must contain only numbers and /
+        // Package must be in format 1/2
         if (
             packageNumber &&
             !/^\d+\/\d+$/.test(packageNumber)
@@ -999,19 +1000,61 @@
 
         articles = [];
 
-
         editingIndex = -1;
-
 
         saveArticles();
 
-
         renderTable();
-
 
         cancelEdit();
 
     }
+
+
+    // Automatically format Package
+    //
+    // 12   -> 1/2
+    // 23   -> 2/3
+    // 123  -> 1/23
+    // 1234 -> 1/234
+    //
+    document
+        .getElementById("packageNumber")
+        .addEventListener(
+            "input",
+            function () {
+
+                // Remove everything except numbers
+                let value =
+                    this.value.replace(
+                        /[^0-9]/g,
+                        ""
+                    );
+
+
+                // Limit length
+                value =
+                    value.substring(0, 4);
+
+
+                // Add slash after first digit
+                if (value.length >= 2) {
+
+                    this.value =
+                        value.charAt(0) +
+                        "/" +
+                        value.substring(1);
+
+                }
+
+                else {
+
+                    this.value = value;
+
+                }
+
+            }
+        );
 
 
     // Keyboard handling
@@ -1070,12 +1113,9 @@
                 event.preventDefault();
 
 
-                const packageNumber =
-                    document
-                        .getElementById("packageNumber");
-
-
-                packageNumber.focus();
+                document
+                    .getElementById("packageNumber")
+                    .focus();
 
             }
 
@@ -1099,23 +1139,6 @@
 
         }
     );
-
-
-    // Allow only numbers and /
-    document
-        .getElementById("packageNumber")
-        .addEventListener(
-            "input",
-            function () {
-
-                this.value =
-                    this.value.replace(
-                        /[^0-9/]/g,
-                        ""
-                    );
-
-            }
-        );
 
 </script>
 
