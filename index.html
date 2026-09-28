@@ -23,7 +23,7 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: auto;
             padding: 20px;
         }
@@ -43,7 +43,7 @@
 
         .form-row {
             display: grid;
-            grid-template-columns: 1fr 2fr auto;
+            grid-template-columns: 1fr 1.5fr 1fr auto;
             gap: 10px;
             align-items: end;
         }
@@ -160,7 +160,7 @@
             color: #777;
         }
 
-        @media (max-width: 650px) {
+        @media (max-width: 750px) {
 
             .container {
                 padding: 12px;
@@ -179,7 +179,7 @@
             }
 
             table {
-                min-width: 600px;
+                min-width: 750px;
             }
 
             .bottom-buttons {
@@ -239,6 +239,23 @@
             </div>
 
 
+            <!-- Package Number -->
+            <div class="field">
+
+                <label for="packageNumber">
+                    Package
+                </label>
+
+                <input
+                    type="text"
+                    id="packageNumber"
+                    placeholder="e.g. 1/2"
+                    inputmode="numeric"
+                    autocomplete="off">
+
+            </div>
+
+
             <!-- Add button -->
             <button
                 id="addButton"
@@ -277,7 +294,7 @@
             <input
                 type="text"
                 id="searchInput"
-                placeholder="Search by article number or name..."
+                placeholder="Search by article, name or package..."
                 autocomplete="off"
                 oninput="renderTable()">
 
@@ -313,6 +330,10 @@
 
                         <th>
                             Article Name
+                        </th>
+
+                        <th>
+                            Package
                         </th>
 
                         <th>
@@ -439,6 +460,13 @@
                 .trim();
 
 
+        const packageNumber =
+            document
+                .getElementById("packageNumber")
+                .value
+                .trim();
+
+
         // Article Number is required
         if (!articleNumber) {
 
@@ -455,6 +483,25 @@
         }
 
 
+        // Package must contain only numbers and /
+        if (
+            packageNumber &&
+            !/^\d+\/\d+$/.test(packageNumber)
+        ) {
+
+            alert(
+                "Package must be in this format: 1/2"
+            );
+
+            document
+                .getElementById("packageNumber")
+                .focus();
+
+            return;
+
+        }
+
+
         // Update existing article
         if (editingIndex !== -1) {
 
@@ -464,6 +511,10 @@
 
             articles[editingIndex].articleName =
                 articleName;
+
+
+            articles[editingIndex].packageNumber =
+                packageNumber;
 
 
             editingIndex = -1;
@@ -492,7 +543,10 @@
                     articleNumber,
 
                 articleName:
-                    articleName
+                    articleName,
+
+                packageNumber:
+                    packageNumber
 
             });
 
@@ -531,6 +585,11 @@
             .getElementById("articleName")
             .value = "";
 
+
+        document
+            .getElementById("packageNumber")
+            .value = "";
+
     }
 
 
@@ -551,6 +610,12 @@
             .getElementById("articleName")
             .value =
             article.articleName;
+
+
+        document
+            .getElementById("packageNumber")
+            .value =
+            article.packageNumber || "";
 
 
         editingIndex = index;
@@ -683,6 +748,12 @@
                             .toLowerCase()
                             .includes(search)
 
+                        ||
+
+                        (article.packageNumber || "")
+                            .toLowerCase()
+                            .includes(search)
+
                     );
 
                 }
@@ -742,6 +813,12 @@
                     <td>
                         ${escapeHtml(
                             article.articleName
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            article.packageNumber || ""
                         )}
                     </td>
 
@@ -823,7 +900,10 @@
                             article.articleNumber,
 
                         "Article Name":
-                            article.articleName
+                            article.articleName,
+
+                        "Package":
+                            article.packageNumber || ""
 
                     };
 
@@ -850,6 +930,10 @@
 
             {
                 wch: 45
+            },
+
+            {
+                wch: 15
             }
 
         ];
@@ -937,12 +1021,6 @@
 
 
             // Enter in Article Number
-            //
-            // If the Article Name is empty,
-            // save immediately.
-            //
-            // If Article Name has text,
-            // move to Article Name.
             if (
 
                 event.key === "Enter" &&
@@ -992,6 +1070,29 @@
                 event.preventDefault();
 
 
+                const packageNumber =
+                    document
+                        .getElementById("packageNumber");
+
+
+                packageNumber.focus();
+
+            }
+
+
+            // Enter in Package
+            else if (
+
+                event.key === "Enter" &&
+
+                document.activeElement.id ===
+                "packageNumber"
+
+            ) {
+
+                event.preventDefault();
+
+
                 addOrUpdateArticle();
 
             }
@@ -999,7 +1100,25 @@
         }
     );
 
+
+    // Allow only numbers and /
+    document
+        .getElementById("packageNumber")
+        .addEventListener(
+            "input",
+            function () {
+
+                this.value =
+                    this.value.replace(
+                        /[^0-9/]/g,
+                        ""
+                    );
+
+            }
+        );
+
 </script>
 
 </body>
 </html>
+
