@@ -119,6 +119,47 @@
         }
 
 
+        /* Article Number - two boxes */
+        .article-number-inputs {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+        }
+
+
+        .article-number-inputs input {
+
+            min-width: 0;
+        }
+
+
+        .article-number-inputs .first-number {
+
+            flex: 1;
+        }
+
+
+        .article-number-inputs .second-number {
+
+            flex: 1;
+        }
+
+
+        .article-number-inputs .separator {
+
+            font-size: 20px;
+
+            font-weight: bold;
+
+            color: #333;
+
+            flex-shrink: 0;
+        }
+
+
         button {
 
             border: none;
@@ -335,16 +376,41 @@
             <!-- Article Number -->
             <div class="field">
 
-                <label for="articleNumber">
+                <label>
                     Article Number
                 </label>
 
-                <input
-                    type="text"
-                    id="articleNumber"
-                    placeholder="e.g. 123-456"
-                    inputmode="numeric"
-                    autocomplete="off">
+
+                <div class="article-number-inputs">
+
+
+                    <!-- First part -->
+                    <input
+                        type="text"
+                        id="articleNumberFirst"
+                        class="first-number"
+                        placeholder="First"
+                        inputmode="numeric"
+                        autocomplete="off">
+
+
+                    <!-- Separator -->
+                    <span class="separator">
+                        -
+                    </span>
+
+
+                    <!-- Second part -->
+                    <input
+                        type="text"
+                        id="articleNumberSecond"
+                        class="second-number"
+                        placeholder="Second"
+                        inputmode="numeric"
+                        autocomplete="off">
+
+
+                </div>
 
             </div>
 
@@ -583,7 +649,7 @@
 
         document
             .getElementById(
-                "articleNumber"
+                "articleNumberFirst"
             )
             .focus();
 
@@ -607,17 +673,84 @@
     }
 
 
+    // Get complete Article Number
+    function getArticleNumber() {
+
+
+        const first =
+            document
+                .getElementById(
+                    "articleNumberFirst"
+                )
+                .value
+                .trim();
+
+
+        const second =
+            document
+                .getElementById(
+                    "articleNumberSecond"
+                )
+                .value
+                .trim();
+
+
+        // If both fields have values
+        if (
+            first &&
+            second
+        ) {
+
+            return first + "-" + second;
+
+        }
+
+
+        // If only first field has value
+        if (first) {
+
+            return first;
+
+        }
+
+
+        // If only second field has value
+        if (second) {
+
+            return second;
+
+        }
+
+
+        return "";
+
+    }
+
+
     // Add or update article
     function addOrUpdateArticle() {
 
 
-        const articleNumber =
+        const first =
             document
                 .getElementById(
-                    "articleNumber"
+                    "articleNumberFirst"
                 )
                 .value
                 .trim();
+
+
+        const second =
+            document
+                .getElementById(
+                    "articleNumberSecond"
+                )
+                .value
+                .trim();
+
+
+        const articleNumber =
+            getArticleNumber();
 
 
         const articleName =
@@ -649,7 +782,7 @@
 
             document
                 .getElementById(
-                    "articleNumber"
+                    "articleNumberFirst"
                 )
                 .focus();
 
@@ -659,22 +792,45 @@
         }
 
 
-        // Article Number must contain only numbers and hyphens
+        // Only numbers are allowed in first part
         if (
-            !/^[0-9-]+$/.test(
-                articleNumber
-            )
+            first &&
+            !/^[0-9]+$/.test(first)
         ) {
 
 
             alert(
-                "Article Number can contain only numbers and -"
+                "Article Number can contain only numbers."
             );
 
 
             document
                 .getElementById(
-                    "articleNumber"
+                    "articleNumberFirst"
+                )
+                .focus();
+
+
+            return;
+
+        }
+
+
+        // Only numbers are allowed in second part
+        if (
+            second &&
+            !/^[0-9]+$/.test(second)
+        ) {
+
+
+            alert(
+                "Article Number can contain only numbers."
+            );
+
+
+            document
+                .getElementById(
+                    "articleNumberSecond"
                 )
                 .focus();
 
@@ -787,10 +943,10 @@
         clearInputs();
 
 
-        // Focus Article Number
+        // Focus first Article Number field
         document
             .getElementById(
-                "articleNumber"
+                "articleNumberFirst"
             )
             .focus();
 
@@ -803,7 +959,14 @@
 
         document
             .getElementById(
-                "articleNumber"
+                "articleNumberFirst"
+            )
+            .value = "";
+
+
+        document
+            .getElementById(
+                "articleNumberSecond"
             )
             .value = "";
 
@@ -832,12 +995,29 @@
             articles[index];
 
 
+        const articleNumber =
+            article.articleNumber || "";
+
+
+        // Split Article Number at -
+        const parts =
+            articleNumber.split("-");
+
+
         document
             .getElementById(
-                "articleNumber"
+                "articleNumberFirst"
             )
             .value =
-            article.articleNumber;
+            parts[0] || "";
+
+
+        document
+            .getElementById(
+                "articleNumberSecond"
+            )
+            .value =
+            parts[1] || "";
 
 
         document
@@ -877,7 +1057,7 @@
 
         document
             .getElementById(
-                "articleNumber"
+                "articleNumberFirst"
             )
             .focus();
 
@@ -921,7 +1101,7 @@
 
         document
             .getElementById(
-                "articleNumber"
+                "articleNumberFirst"
             )
             .focus();
 
@@ -1320,41 +1500,61 @@
     }
 
 
-    // Article Number input
-    //
-    // Allows:
-    // 123456
-    // 123-456
-    // 12-34-56
-    //
-    // Hyphen is optional.
+    // Allow only numbers in Article Number fields
     document
         .getElementById(
-            "articleNumber"
+            "articleNumberFirst"
         )
         .addEventListener(
             "input",
             function () {
 
-
-                // Keep only numbers and hyphens
-                let value =
+                this.value =
                     this.value.replace(
-                        /[^0-9-]/g,
+                        /[^0-9]/g,
                         ""
                     );
 
+            }
+        );
 
-                // Prevent multiple hyphens together
-                value =
-                    value.replace(
-                        /-+/g,
-                        "-"
-                    );
 
+    document
+        .getElementById(
+            "articleNumberSecond"
+        )
+        .addEventListener(
+            "input",
+            function () {
 
                 this.value =
-                    value;
+                    this.value.replace(
+                        /[^0-9]/g,
+                        ""
+                    );
+
+            }
+        );
+
+
+    // Move automatically from first
+    // Article Number box to second box
+    document
+        .getElementById(
+            "articleNumberFirst"
+        )
+        .addEventListener(
+            "input",
+            function () {
+
+                if (
+                    this.value.length > 0
+                ) {
+
+                    // User can press Tab or
+                    // continue manually.
+
+                }
 
             }
         );
@@ -1392,7 +1592,7 @@
                     );
 
 
-                // Add slash between the numbers
+                // Add slash
                 if (
                     value.length === 2
                 ) {
@@ -1423,13 +1623,36 @@
         function (event) {
 
 
-            // Enter in Article Number
+            // Enter in first Article Number
             if (
 
                 event.key === "Enter" &&
 
                 document.activeElement.id ===
-                "articleNumber"
+                "articleNumberFirst"
+
+            ) {
+
+
+                event.preventDefault();
+
+
+                document
+                    .getElementById(
+                        "articleNumberSecond"
+                    )
+                    .focus();
+
+            }
+
+
+            // Enter in second Article Number
+            else if (
+
+                event.key === "Enter" &&
+
+                document.activeElement.id ===
+                "articleNumberSecond"
 
             ) {
 
